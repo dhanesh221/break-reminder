@@ -1,0 +1,8 @@
+{
+  "uuid": "break-reminder@sherlock",
+  "name": "Break Reminder",
+  "description": "Top-bar toggle for periodic eye-break reminders. When on, a full-screen overlay asks you to look away from the screen for a short countdown. Press Escape to dismiss it early.",
+  "shell-version": ["42"],
+  "settings-schema": "org.gnome.shell.extensions.break-reminder",
+  "version": 1
+}

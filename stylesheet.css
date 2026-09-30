@@ -1,0 +1,24 @@
+.break-reminder-backdrop {
+  background-color: rgba(0, 0, 0, 0.88);
+}
+
+.break-reminder-message {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.break-reminder-countdown {
+  color: #ffffff;
+  font-size: 144px;
+  font-weight: 300;
+  font-feature-settings: "tnum";
+  margin-top: 16px;
+}
+
+.break-reminder-hint {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 15px;
+  margin-top: 24px;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.break-reminder"
+          path="/org/gnome/shell/extensions/break-reminder/">
+    <key name="enabled" type="b">
+      <default>false</default>
+      <summary>Break reminders are on</summary>
+      <description>Toggled by clicking the top-bar icon. Persisted so the state survives screen lock and logout.</description>
+    </key>
+    <key name="interval-minutes" type="i">
+      <range min="1" max="720"/>
+      <default>30</default>
+      <summary>Minutes between breaks</summary>
+      <description>Counted from the moment the previous overlay closed (or from when reminders were switched on).</description>
+    </key>
+    <key name="countdown-seconds" type="i">
+      <range min="1" max="600"/>
+      <default>10</default>
+      <summary>Length of the on-screen countdown</summary>
+    </key>
+  </schema>
+</schemalist>
