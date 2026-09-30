@@ -5,18 +5,44 @@
     <key name="enabled" type="b">
       <default>false</default>
       <summary>Break reminders are on</summary>
-      <description>Toggled by clicking the top-bar icon. Persisted so the state survives screen lock and logout.</description>
+      <description>Toggled from the top-bar menu. Persisted so the state survives screen lock and logout.</description>
     </key>
     <key name="interval-minutes" type="i">
       <range min="1" max="720"/>
       <default>30</default>
       <summary>Minutes between breaks</summary>
-      <description>Counted from the moment the previous overlay closed (or from when reminders were switched on).</description>
+      <description>Active minutes before a long break. In eye-break mode this follows each short break.</description>
     </key>
     <key name="countdown-seconds" type="i">
       <range min="1" max="600"/>
       <default>10</default>
       <summary>Length of the on-screen countdown</summary>
+    </key>
+    <key name="eye-breaks-enabled" type="b">
+      <default>true</default>
+      <summary>Alternate gentle eye breaks and long breaks</summary>
+    </key>
+    <key name="eye-interval-minutes" type="i">
+      <range min="1" max="720"/>
+      <default>20</default>
+      <summary>Active minutes before a 20-second eye break</summary>
+    </key>
+    <key name="idle-reset-seconds" type="i">
+      <range min="60" max="3600"/>
+      <default>120</default>
+      <summary>Idle time that counts as a natural break and resets the clock</summary>
+    </key>
+    <key name="suppress-meetings" type="b">
+      <default>true</default>
+      <summary>Pause reminders during focused meeting apps and fullscreen windows</summary>
+    </key>
+    <key name="meeting-apps" type="as">
+      <default>['zoom', 'teams', 'skype', 'webex', 'google meet', 'meet.google.com']</default>
+      <summary>Case-insensitive substrings matched against focused app ID, name, class and title</summary>
+    </key>
+    <key name="stats-json" type="s">
+      <default>'{}'</default>
+      <summary>Local completed-break count, daily streak and last completion date</summary>
     </key>
   </schema>
 </schemalist>
