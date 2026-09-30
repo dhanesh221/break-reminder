@@ -22,3 +22,24 @@
   font-size: 15px;
   margin-top: 24px;
 }
+
+.break-reminder-snooze {
+  background-color: #3584e4;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 10px 18px;
+  margin-top: 16px;
+  font-size: 16px;
+}
+.break-reminder-snooze:hover, .break-reminder-snooze:focus {
+  background-color: #62a0ea;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+.break-reminder-card {
+  background-color: rgba(24, 24, 24, 0.97);
+  border-radius: 12px;
+  border: 1px solid #777777;
+}
+.break-reminder-card-message { color: #ffffff; font-size: 22px; font-weight: bold; }
+.break-reminder-card-countdown { color: #ffffff; font-size: 36px; margin-top: 8px; }
+.break-reminder-card .break-reminder-hint { margin-top: 8px; font-size: 13px; }
