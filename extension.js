@@ -37,6 +37,26 @@ function advanceClock(remaining, elapsed, idle, idleReset, wasIdle) {
         paused: false, reset: false };
 }
 
+// GNOME 42 owns the core idle monitor on the backend. Older API shapes
+// are checked before use; never call a missing introspected method.
+function getIdleMonitor(shellGlobal, meta) {
+    const providers = [
+        [shellGlobal?.backend, 'get_core_idle_monitor'],
+        [meta?.IdleMonitor, 'get_core'],
+    ];
+    for (const [owner, method] of providers) {
+        if (typeof owner?.[method] !== 'function')
+            continue;
+        try {
+            const monitor = owner[method]();
+            if (typeof monitor?.get_idletime === 'function')
+                return monitor;
+        } catch (_) { /* Try the other known API shape. */ }
+    }
+    // Do not pretend the user is active if AFK detection is unavailable.
+    throw new Error('Break Reminder: no supported core idle monitor API');
+}
+
 class BreakOverlay {
     constructor(seconds, onFinished, gentle = false) {
         this._remaining = seconds;
@@ -216,7 +236,7 @@ class BreakIndicator extends PanelMenu.Button {
         this._settings = settings;
         this._timerId = 0;
         this._overlay = null;
-        this._idleMonitor = Meta.IdleMonitor.get_core();
+        this._idleMonitor = getIdleMonitor(global, Meta);
         this._nextShort = settings.get_boolean('eye-breaks-enabled');
         this._wasIdle = false;
         this._icon = new St.Icon({ style_class: 'system-status-icon' });
