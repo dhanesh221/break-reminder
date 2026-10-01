@@ -279,19 +279,31 @@ class BreakIndicator extends PanelMenu.Button {
             this._settings.get_strv('meeting-apps'));
     }
 
+    // Our own open menu holds a modal grab too; that is not a reason to pause.
+    _busy() {
+        return this._focusedSuppressed() || Main.overview.visible ||
+            Main.modalCount > 0 && !this._overlay && !this.menu.isOpen;
+    }
+
     _tick() {
         const now = GLib.get_monotonic_time();
         const elapsed = Math.max(0, (now - this._lastTick) / 1000000);
         this._lastTick = now;
+        if (this._overlay) {
+            // A break is meant to be input-free, so idle time never cancels it.
+            if (this._busy()) {
+                this._remaining = Math.max(this._remaining, 60);
+                this._overlay.destroy();
+                this._overlay = null;
+                this._status.label.text = 'Paused: meeting, fullscreen or Shell dialog';
+            }
+            return;
+        }
         const idle = this._idleMonitor.get_idletime() / 1000;
         const clock = advanceClock(this._remaining, elapsed, idle,
             this._settings.get_int('idle-reset-seconds'), this._wasIdle);
         this._wasIdle = clock.paused;
         if (clock.paused) {
-            if (this._overlay) {
-                this._overlay.destroy();
-                this._overlay = null;
-            }
             if (clock.reset) {
                 this._nextShort = this._settings.get_boolean('eye-breaks-enabled');
                 this._remaining = this._interval();
@@ -299,18 +311,12 @@ class BreakIndicator extends PanelMenu.Button {
             this._status.label.text = clock.reset ? 'Away: break clock reset' : 'Idle: clock paused';
             return;
         }
-        if (this._focusedSuppressed() || Main.overview.visible || Main.modalCount > 0 && !this._overlay) {
+        if (this._busy()) {
             // Pause while busy and leave a full minute of grace afterwards.
             this._remaining = Math.max(this._remaining, 60);
-            if (this._overlay) {
-                this._overlay.destroy();
-                this._overlay = null;
-            }
             this._status.label.text = 'Paused: meeting, fullscreen or Shell dialog';
             return;
         }
-        if (this._overlay)
-            return;
         this._remaining = clock.remaining;
         this._status.label.text = `${this._nextShort ? 'Eye' : 'Long'} break in ${Math.ceil(this._remaining / 60)} min`;
         if (this._remaining <= 0)

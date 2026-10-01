@@ -44,11 +44,12 @@ const settings = {
     set_string: (k, v) => { settingsValues[k] = v; },
 };
 let now = 0, idle = 0, destroyed = 0;
+const mainMock = { overview: { visible: false }, modalCount: 0 };
 const shell = vm.createContext({ Date, console, imports: {
     gi: { Clutter: {}, GLib: { get_monotonic_time: () => now },
         GObject: { registerClass: c => c }, Meta: {}, Shell: {}, St: {} },
     misc: { extensionUtils: {} },
-    ui: { main: { overview: { visible: false }, modalCount: 0 },
+    ui: { main: mainMock,
         panelMenu: { Button }, popupMenu: {} },
 } });
 vm.runInContext(source + '\nthis.Indicator = BreakIndicator;', shell);
@@ -56,7 +57,7 @@ const indicator = Object.create(shell.Indicator.prototype);
 Object.assign(indicator, { _settings: settings, _nextShort: true,
     _remaining: 1200, _wasIdle: false, _lastTick: 0, _overlay: null,
     _idleMonitor: { get_idletime: () => idle * 1000 },
-    _status: { label: {} }, _statsItem: { label: {} },
+    _status: { label: {} }, _statsItem: { label: {} }, menu: { isOpen: false },
 });
 let suppressed = false, shown = 0;
 indicator._focusedSuppressed = () => suppressed;
@@ -65,11 +66,23 @@ now = 1000000; indicator._tick(); assert.equal(indicator._remaining, 1199);
 indicator._remaining = 0; suppressed = true;
 now += 1000000; indicator._tick(); assert.equal(shown, 0); assert.equal(indicator._remaining, 60);
 suppressed = false; idle = 130;
-indicator._overlay = { destroy: () => { destroyed++; } };
-now += 1000000; indicator._tick(); assert.equal(destroyed, 1);
-assert.equal(indicator._overlay, null); assert.equal(indicator._remaining, 1200);
+// Looking away during a break is idle time; it must not cancel the break.
+const overlay = { destroy: () => { destroyed++; } };
+indicator._overlay = overlay;
+now += 1000000; indicator._tick(); assert.equal(destroyed, 0);
+assert.equal(indicator._overlay, overlay);
+indicator._overlay = null;
+now += 1000000; indicator._tick(); assert.equal(indicator._remaining, 1200);
 idle = 0; now += 1000000; indicator._tick(); assert.equal(indicator._remaining, 1200);
 indicator._remaining = 1; now += 1000000; indicator._tick(); assert.equal(shown, 1);
+// Our own open menu is modal but must not pause; a Shell dialog must.
+indicator._remaining = 600; mainMock.modalCount = 1; indicator.menu.isOpen = true;
+now += 1000000; indicator._tick(); assert.equal(indicator._remaining, 599);
+assert.match(indicator._status.label.text, /break in/);
+indicator.menu.isOpen = false;
+now += 1000000; indicator._tick(); assert.equal(indicator._remaining, 599);
+assert.match(indicator._status.label.text, /Paused/);
+mainMock.modalCount = 0;
 indicator._recordBreak(); indicator._updateStats();
 assert.equal(JSON.parse(settingsValues['stats-json']).total, 1);
 settingsValues['stats-json'] = 'invalid'; assert.equal(indicator._readStats().total, 0);
